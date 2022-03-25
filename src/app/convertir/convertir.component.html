@@ -1,0 +1,155 @@
+<div class="content-container">
+  <div class="content-area">
+    <div class="clr-row">
+      <div class="clr-col">
+        <div class="accion">
+          <clr-select-container>
+            <label>Seleccione la fuente de carga</label>
+            <select clrSelect
+                    name="fuentes"
+                    [(ngModel)]="fuente">
+              <option *ngFor="let opcion of api.fuentes;index as i"
+                      [value]="i">{{opcion}}
+              </option>
+            </select>
+          </clr-select-container>
+          <button class="btn btn-primary"
+                  (click)="cargaFuente()"
+                  [clrLoading]="estadoBotonListado"
+                  [disabled]="fuente === undefined">
+            <cds-icon shape="download"></cds-icon>
+            Descargar fuente
+          </button>
+        </div><!-- /.accion -->
+      </div><!-- /.clr-col -->
+    </div><!-- /.clr-row -->
+    <div class="clr-row">
+      <div class="clr-col">
+        <div class="card">
+          <div class="card-block">
+            <clr-progress-bar class="top"
+                              [class.loop]="api.progreso < 0"
+                              [clrValue]="api.progreso"
+                              [clrMax]="100"
+                              [clrFlash]="true"
+                              *ngIf="api.progreso !== 0">
+            </clr-progress-bar>
+            <h4 class="card-title">Resultados</h4>
+            <div class="card-text">
+              <clr-datagrid [(clrDgSelected)]="seleccionados"
+                            [clrDgLoading]="api.progreso < 0">
+                <clr-dg-action-bar>
+                  <div class="btn-group">
+                    <button type="button"
+                            class="btn btn-sm btn-secondary"
+                            [clrLoading]="estadoBotonProceso"
+                            [disabled]="seleccionados.length === 0"
+                            (click)="procesa()">
+                      <cds-icon shape="process-on-vm"></cds-icon>
+                      Procesar seleccionados
+                    </button>
+                  </div>
+                </clr-dg-action-bar>
+                <clr-dg-column [clrDgField]="'idguion'">ID Guión</clr-dg-column>
+                <clr-dg-column [clrDgField]="'titulo'">Título</clr-dg-column>
+                <clr-dg-row *clrDgItems="let fichas of data"
+                            [clrDgItem]="fichas">
+                  <clr-dg-cell>{{fichas.IG_identificador}}</clr-dg-cell>
+                  <clr-dg-cell>{{fichas.IG_titulo}}</clr-dg-cell>
+                </clr-dg-row>
+                <clr-dg-footer>
+                  <clr-dg-pagination #pagination
+                                     [clrDgPageSize]="10">
+                    <clr-dg-page-size *ngIf="data.length > 10"
+                                      [clrPageSizeOptions]="[10,20,50,100]">Guiones por página</clr-dg-page-size>
+                    {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} de {{pagination.totalItems}} guiones
+                  </clr-dg-pagination>
+                </clr-dg-footer>
+                <clr-dg-placeholder>
+                  <div class="tabla-ph">
+                    <p>Seleccione una fuente para descargar la información.</p>
+                  </div>
+                </clr-dg-placeholder>
+              </clr-datagrid>
+            </div><!-- /.card-text -->
+          </div><!-- /.card-block -->
+        </div><!-- /.card -->
+      </div><!-- /.clr-col -->
+      <div class="clr-col">
+        <div class="card"
+             *ngIf="procesadas.length > 0">
+          <div class="card-block">
+            <h4 class="card-title">Fichas procesadas</h4>
+            <div class="card-text">
+              <clr-datagrid>
+                <clr-dg-column [clrDgField]="'idguion'">ID Guión</clr-dg-column>
+                <clr-dg-column [clrDgField]="'titulo'">Título</clr-dg-column>
+                <clr-dg-row *clrDgItems="let guion of procesadas;index as i_guion"
+                            [clrDgItem]="guion">
+                  <clr-dg-cell>{{guion.IG_identificador}}</clr-dg-cell>
+                  <clr-dg-cell>{{guion.IG_titulo}}</clr-dg-cell>
+                  <clr-dg-row-detail *clrIfExpanded>
+                    <table class="table table-compact tabla-interior">
+                      <thead>
+                        <tr>
+                          <th>ID Recurso</th>
+                          <th>Tipo de Ficha</th>
+                          <th>Ver</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let ficha of guion.fichas; index as i_ficha">
+                          <td>{{ficha.idRecurso}}</td>
+                          <td>
+                            <cds-icon shape="user"
+                                      *ngIf="ficha.tipoFicha === 0">
+                            </cds-icon>
+                            <cds-icon shape="users"
+                                      *ngIf="ficha.tipoFicha === 1">
+                            </cds-icon>
+                          </td>
+                          <td>
+                            <button (click)="abreModal([i_guion, i_ficha])"
+                                    class="btn btn-sm btn-link btn-icon">
+                              <cds-icon shape="pop-out"></cds-icon>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </clr-dg-row-detail>
+                </clr-dg-row>
+                <clr-dg-footer>
+                  <clr-dg-pagination #pagination
+                                     [clrDgPageSize]="10">
+                    <clr-dg-page-size *ngIf="data.length > 10"
+                                      [clrPageSizeOptions]="[10,20,50,100]">Guiones por página</clr-dg-page-size>
+                    {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} de {{pagination.totalItems}} guiones
+                  </clr-dg-pagination>
+                </clr-dg-footer>
+              </clr-datagrid>
+            </div><!-- /.card-text -->
+          </div><!-- /.card-block -->
+        </div><!-- /.card -->
+      </div><!-- /.clr-col -->
+    </div><!-- /.clr-row -->
+  </div><!-- /.content-area -->
+</div><!-- /.content-container -->
+<clr-modal [(clrModalOpen)]="modalHTML"
+           [clrModalSize]="'lg'"
+           *ngIf="procesadas.length > 0 && procesadas[numProcesada[0]]">
+  <h3 class="modal-title">
+    {{procesadas[numProcesada[0]].IG_identificador}} -
+    {{procesadas[numProcesada[0]].fichas[numProcesada[1]].idRecurso}}
+  </h3>
+  <div class="modal-body">
+    {{procesadas[numProcesada[0]].fichas[numProcesada[1]].ficha}}
+  </div>
+  <div class="modal-footer">
+    <button type="button"
+            class="btn btn-primary"
+            (click)="modalHTML = false">
+      Cerrar
+    </button>
+  </div>
+</clr-modal>

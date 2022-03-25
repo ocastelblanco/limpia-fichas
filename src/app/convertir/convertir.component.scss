@@ -1,0 +1,19 @@
+.content-container {
+  .content-area {
+    .accion {
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .tabla-ph {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+    }
+    .tabla-interior {
+      margin-top: 0;
+    }
+  }
+}
